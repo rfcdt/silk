@@ -33,9 +33,8 @@ class CrowdstrikeClient(BaseClient):
             for host in response:
                 result = normalizer.normalize(host)
                 yield result
-            break
 
-        self.skip += self.limit
+            self.skip += self.limit
 
     def _fetch_page(self) -> list[dict] | None:
         response = requests.post(

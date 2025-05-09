@@ -1,9 +1,19 @@
-from app.domain.models import UnifiedHost
+from app.domain.models import Bios, UnifiedHost
 from app.infrastructure.clients.base import AssetMerger
 
 
 class CrowdstrikeAssetMerger(AssetMerger):
-    def merge(self, source_data: dict, existing: UnifiedHost):
-        existing.created_at["qualys"] = existing.get("first_seen")
-        existing.last_seen["qualys"] = existing.get("last_seen")
-        existing.service_provider["qualys"] = existing.get("service_provider")
+    def merge(self, source_data: UnifiedHost, existing: UnifiedHost):
+        existing.created_at["crowdstrike"] = source_data.created_at["crowdstrike"]
+        existing.last_seen["crowdstrike"] = source_data.last_seen["crowdstrike"]
+        existing.service_provider["crowdstrike"] = source_data.service_provider[
+            "crowdstrike"
+        ]
+        if existing.bios is None:
+            existing.bios = Bios(
+                manufacturer=source_data.bios.manufacturer,
+                version=source_data.bios.version,
+            )
+        else:
+            existing.bios.manufacturer = source_data.bios.manufacturer
+            existing.bios.version = source_data.bios.version

@@ -11,6 +11,8 @@ class Bios(BaseModel):
 
     
 class UnifiedHost(BaseModel):
+    # _id: Optional[]
+
     # main fields
     instance_id: str
     hostname: str

@@ -1,33 +1,40 @@
-from app.domain.models import UnifiedHost
+from app.domain.models import Bios, UnifiedHost
 from app.infrastructure.clients.base import BaseNormalizer
 
 
 class QualysNormalizer(BaseNormalizer):
-    
     def normalize(self, raw: dict):
-        source_info = raw.get("sourceInfo", {}).get("list", [{}])[0].get("Ec2AssetSourceSimple", {})
-        host_asset_interface = raw.get("networkInterface", {}).get("list", [{}])[0].get('HostAssetInterface', {})
+        source_info = (
+            raw.get("sourceInfo", {})
+            .get("list", [{}])[0]
+            .get("Ec2AssetSourceSimple", {})
+        )
+        host_asset_interface = (
+            raw.get("networkInterface", {})
+            .get("list", [{}])[0]
+            .get("HostAssetInterface", {})
+        )
         accounts = raw.get("account", {}).get("list", [])
         open_ports = raw.get("openPort", {}).get("list", [])
         processors = raw.get("processor", {}).get("list", [])
         agent_info = raw.get("agentInfo", {})
 
         return UnifiedHost(
-            instance_id=source_info.get('instanceId'),
+            instance_id=source_info.get("instanceId"),
             hostname=raw.get("dnsHostName"),
-            local_ip=raw.get('address'),
-            public_ip=source_info.get('publicIpAddress'),
-            os=raw.get('os'),
-            platform=agent_info.get('platform'),
-            manufacturer=raw.get('manufacturer'),
-            model=raw.get('model'),
-            availability_zone=source_info.get('availabilityZone'),
+            local_ip=raw.get("address"),
+            public_ip=source_info.get("publicIpAddress"),
+            os=raw.get("os"),
+            platform=agent_info.get("platform"),
+            manufacturer=raw.get("manufacturer"),
+            model=raw.get("model"),
+            availability_zone=source_info.get("availabilityZone"),
             # gateway_address=host_asset_interface.get('gatewayAddress'),
-
-            created_at={'qualys': raw.get('first_seen')},
-            last_seen={'qualys': raw.get('last_seen')},
-            service_provider={'qualys': raw.get('service_provider')},
-
+            created_at={"qualys": raw.get("created")},
+            last_seen={"qualys": agent_info.get("lastCheckedIn", {}).get("$date")},
+            service_provider={"qualys": raw.get("cloudProvider")},
+            bios=Bios(description=raw.get("biosDescription")),
+            account_id=source_info.get("accountId"),
             # hostname=raw.get("fqdn"),
             # os=raw.get("os"),
             # kernel_version=None,

@@ -6,13 +6,13 @@ from app.domain.models import UnifiedHost
 
 class AssetMerger(abc.ABC):
     @abc.abstractmethod
-    def merge(self, source_data: dict, existing: UnifiedHost):
+    def merge(self, source_data: UnifiedHost, existing: UnifiedHost):
         pass
 
 
 class BaseNormalizer(abc.ABC):
     @abc.abstractmethod
-    def normalize(self):
+    def normalize(self, raw: dict):
         pass
 
 
