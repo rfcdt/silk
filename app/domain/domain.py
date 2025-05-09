@@ -15,7 +15,7 @@ class IRepository(Protocol):
 
 
 class IClient(Protocol):
-    def fetch_hosts(self) -> Iterator[UnifiedHost]:
+    def fetch_hosts(self) -> Iterator[List[UnifiedHost]]:
         pass
 
 
@@ -46,52 +46,46 @@ class DomainService:
         self.asset_merger = asset_merger
 
     def merge_hosts(self):
-        print("=================")
         # maybe use pandas or pyspark to determine duplicates
-
-        # TODO: it retrive only one limit+skip. fix
         iterator_hosts = self.client.fetch_hosts()
-
-        hosts = [item for item in iterator_hosts]
-        # print(hosts)
-
-        compound_hosts_for_filtering = self.get_generate_hosts_for_filtering(hosts)
-        # retrive possible duplicated hosts
-        # it doesn't retrive the whole collection as we have filters
-        # and in the current itera
-        possible_duplicates_dict = self.get_possible_duplicates(
-            compound_hosts_for_filtering
-        )
-
-        result_to_save = []
-        result_to_update = []
-
-        for host in hosts:
-            duplicate = possible_duplicates_dict.get(
-                self.COMPOUND_KEY_STR.format(
-                    instance_id=host.instance_id,
-                    hostname=host.hostname,
-                    local_ip=host.local_ip,
-                    public_ip=host.public_ip,
-                    os=host.os,
-                    platform=host.platform,
-                    manufacturer=host.manufacturer,
-                    model=host.model,
-                    availability_zone=host.availability_zone,
-                    # gateway_address=host.gateway_address,
-                )
+        for hosts in iterator_hosts:
+            compound_hosts_for_filtering = self.get_generate_hosts_for_filtering(hosts)
+            # retrive possible duplicated hosts
+            # it doesn't retrive the whole collection as we have filters
+            # and in the current itera
+            possible_duplicates_dict = self.get_possible_duplicates(
+                compound_hosts_for_filtering
             )
 
-            if duplicate:
-                self.asset_merger.merge(host, duplicate)
+            result_to_save = []
+            result_to_update = []
 
-                duplicate_dict = duplicate.model_dump()
-                result_to_update.append(duplicate_dict)
-            else:
-                result_to_save.append(host.model_dump())
+            for host in hosts:
+                duplicate = possible_duplicates_dict.get(
+                    self.COMPOUND_KEY_STR.format(
+                        instance_id=host.instance_id,
+                        hostname=host.hostname,
+                        local_ip=host.local_ip,
+                        public_ip=host.public_ip,
+                        os=host.os,
+                        platform=host.platform,
+                        manufacturer=host.manufacturer,
+                        model=host.model,
+                        availability_zone=host.availability_zone,
+                        # gateway_address=host.gateway_address,
+                    )
+                )
 
-        self.repository.save_many(result_to_save)
-        self.repository.update_many(result_to_update)
+                if duplicate:
+                    self.asset_merger.merge(host, duplicate)
+
+                    duplicate_dict = duplicate.model_dump()
+                    result_to_update.append(duplicate_dict)
+                else:
+                    result_to_save.append(host.model_dump())
+
+            self.repository.save_many(result_to_save)
+            self.repository.update_many(result_to_update)
 
     def get_generate_hosts_for_filtering(self, hosts: List[UnifiedHost]):
         return [
@@ -111,9 +105,7 @@ class DomainService:
         ]
 
     def get_possible_duplicates(self, compound_hosts_for_filtering) -> Dict[str, Any]:
-        possible_duplicates_query = self.repository.find_by_filter(
-            {"$or": compound_hosts_for_filtering}  # TODO: move "or" out of here
-        )
+        possible_duplicates_query = self.repository.find_by_filter(compound_hosts_for_filtering)
         # generate a dict with a key as a string to get it inside the loop
         return {
             self.COMPOUND_KEY_STR.format(

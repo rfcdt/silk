@@ -11,10 +11,8 @@ class Bios(BaseModel):
 
     
 class UnifiedHost(BaseModel):
-    # _id: Optional[]
-
     # main fields
-    instance_id: str
+    instance_id: Optional[str]
     hostname: str
     local_ip: str
     public_ip: str
@@ -22,7 +20,7 @@ class UnifiedHost(BaseModel):
     platform: str
     manufacturer: str
     model: str
-    availability_zone: str
+    availability_zone: Optional[str]
     # kernel_version: str
     
     # with sources

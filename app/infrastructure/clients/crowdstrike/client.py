@@ -1,4 +1,4 @@
-from typing import Iterator
+from typing import Iterator, List
 
 import requests
 
@@ -13,16 +13,14 @@ class CrowdstrikeClient(BaseClient):
     API_URL = "https://api.recruiting.app.silk.security/api/crowdstrike/hosts/get"
     TIMEOUT = 5
 
-    def __init__(
-        self, api_key: str, limit: int = 2, skip: int = 0
-    ):  # TODO:: check limit: sometime 2 and 1 response
+    def __init__(self, api_key: str, limit: int = 2, skip: int = 0):
         self.api_key = api_key
         self.limit = limit
         self.skip = skip
 
-    def fetch_hosts(self) -> Iterator[UnifiedHost]:
+    def fetch_hosts(self) -> Iterator[List[UnifiedHost]]:
         """
-        Yield raw host objects from Qualys API.
+        Yield raw host objects from Crowdstrike API.
         """
         normalizer = self.get_normalizer()
         while True:
@@ -30,9 +28,8 @@ class CrowdstrikeClient(BaseClient):
             if not response:
                 break
 
-            for host in response:
-                result = normalizer.normalize(host)
-                yield result
+            result = [normalizer.normalize(host) for host in response]
+            yield result
 
             self.skip += self.limit
 
@@ -45,8 +42,11 @@ class CrowdstrikeClient(BaseClient):
             },
             timeout=self.TIMEOUT,
         )
+        print("QUERY", response.status_code)
+
         if response.status_code != 200:
             return None
+
         return response.json()
 
     def get_normalizer(self):

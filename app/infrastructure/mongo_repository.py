@@ -9,7 +9,7 @@ class MongoRepository:
         self._collection = collection
 
     def find_by_filter(self, filters: Dict[str, Any]) -> List[Dict[str, Any]]:
-        return list(self._collection.find(filters))
+        return list(self._collection.find({"$or": filters}))
 
     def save_many(self, data: List[Dict[str, Any]]) -> Any:
         if not data:
