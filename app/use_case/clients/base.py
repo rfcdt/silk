@@ -1,7 +1,7 @@
 import abc
 from typing import Iterator
 
-from models.host import UnifiedHostAsset
+from app.domain.models import UnifiedHost
 
 
 class BaseNormalizer(abc.ABC):
@@ -13,7 +13,7 @@ class BaseNormalizer(abc.ABC):
 class BaseClient(abc.ABC):
     
     @abc.abstractmethod
-    def fetch_hosts(self) -> Iterator[UnifiedHostAsset]:
+    def fetch_hosts(self) -> Iterator[UnifiedHost]:
         pass
     
     @abc.abstractmethod

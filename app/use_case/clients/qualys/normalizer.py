@@ -1,5 +1,5 @@
-from clients.base import BaseNormalizer
-from models.host import UnifiedHost
+from app.domain.models import UnifiedHost
+from app.use_case.clients.base import BaseNormalizer
 
 
 class QualysNormalizer(BaseNormalizer):

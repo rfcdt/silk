@@ -1,8 +1,7 @@
-from typing import Dict, List, Optional, Union
-from pydantic import BaseModel, Field, model_validator
 from datetime import datetime
+from typing import Dict, List, Optional, Union
 
-
+from pydantic import BaseModel, Field, model_validator
 
 # ---- agen info
 

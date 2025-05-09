@@ -1,5 +1,5 @@
-from clients.base import BaseNormalizer
-from models.host import Account, AgentInfo, UnifiedHost
+from app.domain.models import UnifiedHost
+from app.use_case.clients.base import BaseNormalizer
 
 
 class CrowdstrikeNormalizer(BaseNormalizer):

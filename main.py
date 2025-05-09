@@ -1,57 +1,71 @@
 import argparse
 import os
-from itertools import chain
 
 from dotenv import load_dotenv
-from pymongo import MongoClient
-from pymongo.server_api import ServerApi
+from pymongo.collection import Collection
 
-from clients import ClientFactory
+from app.use_case.merge_hosts import MergeHostDto, MergeHostUseCase
+from db import DbConnection
 
 load_dotenv()
 
-
 API_KEY = os.environ['API_KEY']
-
-# MONGODB_URI = os.environ["MONGODB_URI"]
-# MONGO_INITDB_DATABASE = os.environ["MONGO_INITDB_DATABASE"]
-
-
-
+MONGODB_URI = os.environ["MONGODB_URI"]
+MONGO_INITDB_DATABASE = os.environ["MONGO_INITDB_DATABASE"]
 CHOICES = ["qualys", "crowdstrike"]
+
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", choices=CHOICES)
     args = parser.parse_args()
 
+    source = args.source # qualys | crodstrike
 
-    return
+    collection = get_mongodb_collection()
 
-    client = MongoClient(MONGODB_URI)
-    db = client[MONGO_INITDB_DATABASE]
+    use_case = MergeHostUseCase()
+    use_case.merge(MergeHostDto(
+        source=source,
+        collection=collection,
+        api_key=API_KEY
+    ))
+
+    # merged_data = chain(crowdstrike_data, qualys_data)
+    
+def get_mongodb_collection() -> Collection:
+    print('Connection to Mongo is in progress.')
+    try:
+        db_connector = DbConnection(MONGODB_URI, MONGO_INITDB_DATABASE)
+    except Exception as exc:
+        print("Error with connection to db. ", exc)
+        # log
+        return
+    
+    print('Connection is ready.')
+    connection = db_connector.get_connection()
+    db = connection[MONGO_INITDB_DATABASE]
+    
     collection = db['test']
 
-    client = ClientFactory.get_client('crowdstrike', API_KEY)
-    crowdstrike_data = client.fetch_hosts()
+    # add indexes with asc order as we don't care of it
+    fields = {
+        'instance_id': 1,
+        'hostname': 1,
+        'local_ip': 1,
+        'public_ip': 1,
+        'os': 1,
+        'platform': 1,
+        'manufacturer': 1,
+        'model': 1,
+        'availability_zone': 1,
+        'gateway_address': 1,
+    }
+    collection.create_index(fields, {
+        'unique': True
+    })
 
-    client = ClientFactory.get_client('qualys', API_KEY)
-    qualys_data = client.fetch_hosts()
-
-    merged_data = chain(crowdstrike_data, qualys_data)
-    
-    i = 0
-    for item in merged_data:
-        i+=1
-
-        t = collection.find_one({"hostname": item.hostname})
-        print(t)
-        if not t:
-            x = collection.insert_one(item)
-        else:
-            pass
-        print(i)
-
+    return collection
 
 if __name__ == "__main__":
     main()

@@ -16,6 +16,7 @@ class ClientFactory:
 
         client = clients.get(key)
         if client is None:
+            # TODO: raise custom exception
             raise Exception(f"The client {client} is not implemented")
 
         return client[0](client[1])
