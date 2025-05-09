@@ -8,14 +8,14 @@ from app.infrastructure.clients import ClientFactory
 from app.infrastructure.mongo_repository import MongoRepository
 
 
-class TestChoice(str, Enum):
+class SourceChoice(str, Enum):
     qualys = "qualys"
     crowdstrike = "crowdstrike"
 
 
 @dataclass
 class MergeHostDto:
-    source: TestChoice
+    source: SourceChoice
     collection: Collection
     api_key: str
 

@@ -1,4 +1,4 @@
-from typing import Iterator, List
+from typing import Iterator
 
 import requests
 
@@ -18,7 +18,7 @@ class QualysClient(BaseClient):
         self.limit = limit
         self.skip = skip
 
-    def fetch_hosts(self) -> Iterator[List[UnifiedHost]]:
+    def fetch_hosts(self) -> Iterator[list[UnifiedHost]]:
         """
         Yield raw host objects from Qualys API.
         """

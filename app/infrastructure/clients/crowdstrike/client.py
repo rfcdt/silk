@@ -1,4 +1,4 @@
-from typing import Iterator, List
+from typing import Iterator
 
 import requests
 
@@ -18,7 +18,7 @@ class CrowdstrikeClient(BaseClient):
         self.limit = limit
         self.skip = skip
 
-    def fetch_hosts(self) -> Iterator[List[UnifiedHost]]:
+    def fetch_hosts(self) -> Iterator[list[UnifiedHost]]:
         """
         Yield raw host objects from Crowdstrike API.
         """
@@ -42,7 +42,6 @@ class CrowdstrikeClient(BaseClient):
             },
             timeout=self.TIMEOUT,
         )
-        print("QUERY", response.status_code)
 
         if response.status_code != 200:
             return None

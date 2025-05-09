@@ -7,7 +7,7 @@ class DbConnection:
         self._db_name = db_name
 
         self._connection = None
-    
+
     def get_connection(self) -> MongoClient:
         if not self._connection:
             self._connection = MongoClient(self._mongodb_uri)

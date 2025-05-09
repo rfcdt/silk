@@ -19,7 +19,7 @@ class BaseNormalizer(abc.ABC):
 class BaseClient(abc.ABC):
     
     @abc.abstractmethod
-    def fetch_hosts(self) -> Iterator[UnifiedHost]:
+    def fetch_hosts(self) -> Iterator[list[UnifiedHost]]:
         pass
     
     @abc.abstractmethod

@@ -1,5 +1,3 @@
-from typing import TypeAlias
-
 from app.infrastructure.clients.base import BaseClient
 
 from .crowdstrike import CrowdstrikeClient
@@ -8,7 +6,7 @@ from .qualys import QualysClient
 
 class ClientFactory:
     @staticmethod
-    def get_client(key: str, api_key) -> BaseClient:
+    def get_client(key: str, api_key: str) -> BaseClient:
         clients = {
             "crowdstrike": (CrowdstrikeClient, api_key),
             "qualys": (QualysClient, api_key),

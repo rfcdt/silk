@@ -58,7 +58,6 @@ def get_mongodb_collection() -> Collection:
         "manufacturer": 1,
         "model": 1,
         "availability_zone": 1,
-        # "gateway_address": 1,
     }
     collection.create_index(fields, unique=True)
 

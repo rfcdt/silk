@@ -1,26 +1,26 @@
-from typing import Any, Dict, Iterator, List, Optional, Protocol
+from typing import Any, Iterator, Protocol
 
 from .models import UnifiedHost
 
 
 class IRepository(Protocol):
-    def find_by_filter(self, filters: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def find_by_filter(self, filters: dict[str, Any]) -> list[dict[str, Any]]:
         pass
 
-    def save_many(self, data: List[Dict[str, Any]]) -> Any:
+    def save_many(self, data: list[dict[str, Any]]) -> None:
         pass
 
-    def update_many(self, data: List[Dict[str, Any]]) -> Any:
+    def update_many(self, data: list[dict[str, Any]]) -> None:
         pass
 
 
 class IClient(Protocol):
-    def fetch_hosts(self) -> Iterator[List[UnifiedHost]]:
+    def fetch_hosts(self) -> Iterator[list[UnifiedHost]]:
         pass
 
 
 class IAssetMerger(Protocol):
-    def merge(self, source_data: UnifiedHost, existing: UnifiedHost):
+    def merge(self, source_data: UnifiedHost, existing: UnifiedHost) -> None:
         pass
 
 
@@ -35,11 +35,13 @@ class DomainService:
         "{manufacturer}_"
         "{model}_"
         "{availability_zone}"
-        # "{gateway_address}"
     )
 
     def __init__(
-        self, client: IClient, repository: IRepository, asset_merger: IAssetMerger
+        self,
+        client: IClient,
+        repository: IRepository,
+        asset_merger: IAssetMerger,
     ):
         self.client = client
         self.repository = repository
@@ -54,7 +56,7 @@ class DomainService:
             # it doesn't retrive the whole collection as we have filters
             # and in the current itera
             possible_duplicates_dict = self.get_possible_duplicates(
-                compound_hosts_for_filtering
+                compound_hosts_for_filtering,
             )
 
             result_to_save = []
@@ -72,8 +74,7 @@ class DomainService:
                         manufacturer=host.manufacturer,
                         model=host.model,
                         availability_zone=host.availability_zone,
-                        # gateway_address=host.gateway_address,
-                    )
+                    ),
                 )
 
                 if duplicate:
@@ -87,7 +88,7 @@ class DomainService:
             self.repository.save_many(result_to_save)
             self.repository.update_many(result_to_update)
 
-    def get_generate_hosts_for_filtering(self, hosts: List[UnifiedHost]):
+    def get_generate_hosts_for_filtering(self, hosts: list[UnifiedHost]) -> list[dict]:
         return [
             {
                 "instance_id": host.instance_id,
@@ -99,13 +100,14 @@ class DomainService:
                 "manufacturer": host.manufacturer,
                 "model": host.model,
                 "availability_zone": host.availability_zone,
-                # "gateway_address": host.gateway_address,
             }
             for host in hosts
         ]
 
-    def get_possible_duplicates(self, compound_hosts_for_filtering) -> Dict[str, Any]:
-        possible_duplicates_query = self.repository.find_by_filter(compound_hosts_for_filtering)
+    def get_possible_duplicates(self, compound_hosts_for_filtering: list[dict]) -> dict[str, Any]:
+        possible_duplicates_query = self.repository.find_by_filter(
+            compound_hosts_for_filtering,
+        )
         # generate a dict with a key as a string to get it inside the loop
         return {
             self.COMPOUND_KEY_STR.format(
@@ -118,7 +120,6 @@ class DomainService:
                 manufacturer=possible_duplicate["manufacturer"],
                 model=possible_duplicate["model"],
                 availability_zone=possible_duplicate["availability_zone"],
-                # gateway_address=possible_duplicate.gateway_address,
             ): UnifiedHost(**possible_duplicate)
             for possible_duplicate in possible_duplicates_query
         }
