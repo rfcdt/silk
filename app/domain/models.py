@@ -21,7 +21,6 @@ class UnifiedHost(BaseModel):
     manufacturer: str
     model: str
     availability_zone: str
-    gateway_address: str
     # kernel_version: str
     
     # with sources
@@ -29,6 +28,7 @@ class UnifiedHost(BaseModel):
     last_seen: Optional[Dict[str, Optional[datetime]]]
     service_provider: Optional[Dict[str, Optional[str]]] # cloudProvider & service_provider
 
+    # gateway_address: str
     # differ
     # agent_version: Optional[str]
     # agent_info: Optional[AgentInfo]
@@ -61,7 +61,7 @@ class UnifiedHost(BaseModel):
     # status: Optional[str]
 
     # common
-    bios: Optional[Bios]
-    account_id: str # TODO: not sure if needed
+    bios: Optional[Bios] = None
+    account_id: Optional[str] = None  # TODO: not sure if needed
 
 

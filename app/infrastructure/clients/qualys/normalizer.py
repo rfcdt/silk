@@ -1,5 +1,5 @@
 from app.domain.models import UnifiedHost
-from app.use_case.clients.base import BaseNormalizer
+from app.infrastructure.clients.base import BaseNormalizer
 
 
 class QualysNormalizer(BaseNormalizer):
@@ -12,8 +12,6 @@ class QualysNormalizer(BaseNormalizer):
         processors = raw.get("processor", {}).get("list", [])
         agent_info = raw.get("agentInfo", {})
 
-
-
         return UnifiedHost(
             instance_id=source_info.get('instanceId'),
             hostname=raw.get("dnsHostName"),
@@ -24,11 +22,11 @@ class QualysNormalizer(BaseNormalizer):
             manufacturer=raw.get('manufacturer'),
             model=raw.get('model'),
             availability_zone=source_info.get('availabilityZone'),
-            gateway_address=host_asset_interface.get('gatewayAddress'),
+            # gateway_address=host_asset_interface.get('gatewayAddress'),
 
             created_at={'qualys': raw.get('first_seen')},
             last_seen={'qualys': raw.get('last_seen')},
-            service_provider={'qualys', raw.get('service_provider')},
+            service_provider={'qualys': raw.get('service_provider')},
 
             # hostname=raw.get("fqdn"),
             # os=raw.get("os"),
