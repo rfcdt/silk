@@ -50,11 +50,14 @@ class DomainService:
     def merge_hosts(self):
         # maybe use pandas or pyspark to determine duplicates
         iterator_hosts = self.client.fetch_hosts()
+
+        # get list of hosts on each API request
         for hosts in iterator_hosts:
             compound_hosts_for_filtering = self.get_generate_hosts_for_filtering(hosts)
+            
             # retrive possible duplicated hosts
             # it doesn't retrive the whole collection as we have filters
-            # and in the current itera
+            # and in the current iteration we can have the same amount as in the LIMIT var
             possible_duplicates_dict = self.get_possible_duplicates(
                 compound_hosts_for_filtering,
             )
@@ -78,11 +81,12 @@ class DomainService:
                 )
 
                 if duplicate:
+                    # if there duplicate then we make merge between
+                    # existing model and response model
                     self.asset_merger.merge(host, duplicate)
-
-                    duplicate_dict = duplicate.model_dump()
-                    result_to_update.append(duplicate_dict)
+                    result_to_update.append(duplicate.model_dump())
                 else:
+                    # if there is no duplicate then it's new record
                     result_to_save.append(host.model_dump())
 
             self.repository.save_many(result_to_save)
@@ -104,7 +108,9 @@ class DomainService:
             for host in hosts
         ]
 
-    def get_possible_duplicates(self, compound_hosts_for_filtering: list[dict]) -> dict[str, Any]:
+    def get_possible_duplicates(
+        self, compound_hosts_for_filtering: list[dict]
+    ) -> dict[str, Any]:
         possible_duplicates_query = self.repository.find_by_filter(
             compound_hosts_for_filtering,
         )

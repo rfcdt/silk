@@ -1,17 +1,18 @@
 import argparse
-import os
 
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 from pymongo.collection import Collection
 
 from app.use_case.merge_hosts import MergeHostDto, MergeHostUseCase
 from db import DbConnection
 
-load_dotenv()
-
-API_KEY = os.environ["API_KEY"]
-MONGODB_URI = os.environ["MONGODB_URI"]
-MONGO_INITDB_DATABASE = os.environ["MONGO_INITDB_DATABASE"]
+config_env = {
+    **dotenv_values(".env"),
+    **dotenv_values(".env.local"),
+}
+API_KEY = config_env["API_KEY"]
+MONGODB_URI = config_env["MONGODB_URI"]
+MONGO_INITDB_DATABASE = config_env["MONGO_INITDB_DATABASE"]
 CHOICES = ["qualys", "crowdstrike"]
 
 
@@ -21,7 +22,7 @@ def main():
     args = parser.parse_args()
 
     source = args.source  # qualys | crodstrike
-    
+    print("Source: ", source)
     collection = get_mongodb_collection()
 
     use_case = MergeHostUseCase()
@@ -30,6 +31,7 @@ def main():
         collection=collection,
         api_key=API_KEY,
     ))
+    print("Done.")
 
 
 def get_mongodb_collection() -> Collection:

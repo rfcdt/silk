@@ -1,21 +1,5 @@
 services:
-  # api:
-  #   build: .
-  #   container_name: fastapi-app
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - .:/app
-  #   depends_on:
-  #     - redis
-  #     - mongodb
-
-  # redis:
-  #   image: redis:7
-  #   container_name: redis
-  #   ports:
-  #     - "6379:6379"
-
+ 
   mongodb:
     image: mongo:8
     container_name: mongodb
@@ -28,28 +12,6 @@ services:
       - "${MONGO_PORT}:27017"
     volumes:
       - mongo-data:/data/db
-
-
-  # celery_worker:
-  #   build: .
-  #   container_name: celery-worker
-  #   command: celery -A app.worker.celery worker --loglevel=info
-  #   volumes:
-  #     - .:/app
-  #   depends_on:
-  #     - redis
-  #     - mongodb
-
-  # celery_beat:
-  #   build: .
-  #   container_name: celery-beat
-  #   command: celery -A app.worker.celery beat --loglevel=info
-  #   volumes:
-  #     - .:/app
-  #   depends_on:
-  #     - redis
-  #     - mongodb
-
 
 volumes:
   mongo-data:
